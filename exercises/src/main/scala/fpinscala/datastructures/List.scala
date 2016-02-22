@@ -12,11 +12,14 @@ object List {
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
 
-  def init[A](l: List[A]): List[A] = l match {
-    case Nil => sys.error("init of empty list")
-    case Cons(h, Nil) => Nil // a single item list should return nothing
-    case Cons(h, t) => Cons(h, init(t))
-  }
+  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B = // Utility functions
+    as match {
+      case Nil => z
+      case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+    }
+
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((x,y) => 1 + y)
 }
 
 object List { // `List` companion object. Contains functions for creating and working with lists.
@@ -92,9 +95,27 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(h, t) => Cons(h, init(t))
   }
 
-  def length[A](l: List[A]): Int = sys.error("todo")
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((x,y) => 1 + y)
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = {
+    @annotation.tailrec
+    def go(a: List[A], b: B): B = a match {
+      case Nil => b
+      case Cons(h,t) => f(h, go(t,b)(f))
+    }
+    go(l, z)(f)
+  }
+
+  @annotation.tailrec
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = l match {
+    case Nil => z
+    case Cons(h,t) => foldLeft(t, f(z,h))(f)
+  }
+
+  def reverse[A](l: List[A]): List[A] = l match {
+
+  }
 
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }
