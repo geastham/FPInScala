@@ -7,6 +7,21 @@ which may be `Nil` or another `Cons`.
  */
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
+object List {
+  def apply[A](as: A*): List[A] = // Variadic function syntax
+    if (as.isEmpty) Nil
+    else Cons(as.head, apply(as.tail: _*))
+
+  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B = // Utility functions
+    as match {
+      case Nil => z
+      case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+    }
+
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((x,y) => 1 + y)
+}
+
 object List { // `List` companion object. Contains functions for creating and working with lists.
   def sum(ints: List[Int]): Int = ints match { // A function that uses pattern matching to add up a list of integers
     case Nil => 0 // The sum of the empty list is 0.
@@ -22,14 +37,6 @@ object List { // `List` companion object. Contains functions for creating and wo
   def apply[A](as: A*): List[A] = // Variadic function syntax
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
-
-  val x = List(1,2,3,4,5) match {
-    case Cons(x, Cons(2, Cons(4, _))) => x
-    case Nil => 42
-    case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
-    case Cons(h, t) => h + sum(t)
-    case _ => 101
-  }
 
   def append[A](a1: List[A], a2: List[A]): List[A] =
     a1 match {
@@ -50,19 +57,75 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldRight(ns, 1.0)(_ * _) // `_ * _` is more concise notation for `(x,y) => x * y`; see sidebar
 
 
-  def tail[A](l: List[A]): List[A] = sys.error("todo")
+  def tail[A](l: List[A]): List[A] = l match {
+    case Nil => sys.error("tail of empty list")
+    case Cons(_,t) => t
+  }
 
-  def setHead[A](l: List[A], h: A): List[A] = sys.error("todo")
+  def setHead[A](l: List[A], h: A): List[A] = l match {
+    case Nil => sys.error("setHead of empty list")
+    case Cons(_, t) => Cons(h, t)
+  }
 
-  def drop[A](l: List[A], n: Int): List[A] = sys.error("todo")
+  def drop[A](l: List[A], n: Int): List[A] =
+    if (n <= 0) l
+    else l match {
+      case Nil => Nil
+      case Cons(_,t) => drop(t, n-1)
+    }
 
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = sys.error("todo")
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    case Nil => Nil
+    case Cons(h, t) => {
+      if(f(h)) Cons(h, dropWhile(t, f))
+      else dropWhile(t, f)
+    }
+  }
 
-  def init[A](l: List[A]): List[A] = sys.error("todo")
+  // Answerkey
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] =
+    l match {
+      case Cons(h,t) if f(h) => dropWhile(t, f)
+      case _ => l
+    }
 
-  def length[A](l: List[A]): Int = sys.error("todo")
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => sys.error("init of empty list")
+    case Cons(h, Nil) => Nil // a single item list should return nothing
+    case Cons(h, t) => Cons(h, init(t))
+  }
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((x,y) => 1 + y)
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = {
+    @annotation.tailrec
+    def go(a: List[A], b: B): B = a match {
+      case Nil => b
+      case Cons(h,t) => f(h, go(t,b)(f))
+    }
+    go(l, z)(f)
+  }
+
+  @annotation.tailrec
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = l match {
+    case Nil => z
+    case Cons(h,t) => foldLeft(t, f(z,h))(f)
+  }
+
+  def reverse[A](l: List[A]): List[A] = {
+    foldLeft(l, List[A]())((acc,h) => Cons(h, acc))
+  }
+
+  def map[A,B](l: List[A])(f: A => B): List[B] = {
+    foldRight(l, Nil)((x,y) => Cons(f(x), y))
+  }
+}
+
+val x = List(1,2,3,4,5) match {
+  case Cons(x, Cons(2, Cons(4, _))) => x
+  case Nil => 42
+  case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
+  case Cons(h, t) => h + List.sum(t)
+  case _ => 101
 }
