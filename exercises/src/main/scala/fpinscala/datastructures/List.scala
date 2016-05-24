@@ -34,6 +34,11 @@ object List {
     case Nil => Nil
     case Cons(h,t) => Cons(f(h), map(t)(f))
   }
+
+  def flatMap[A,B](l: List[A]): List[B] = l match {
+    case Nil => Nil
+    case Cons(h, t) => append
+  }
 }
 
 object List { // `List` companion object. Contains functions for creating and working with lists.
