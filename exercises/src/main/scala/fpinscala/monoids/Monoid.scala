@@ -21,15 +21,30 @@ object Monoid {
     val zero = Nil
   }
 
-  val intAddition: Monoid[Int] = sys.error("todo")
+  val intAddition: Monoid[Int] = new Monoid[Int] {
+    def op(x: Int, y: Int) = x + y
+    val zero = 0
+  }
 
-  val intMultiplication: Monoid[Int] = sys.error("todo")
+  val intMultiplication: Monoid[Int] = new Monoid[Int] {
+    def op(x: Int, y: Int) = x * y
+    val zero = 1
+  }
 
-  val booleanOr: Monoid[Boolean] = sys.error("todo")
+  val booleanOr: Monoid[Boolean] = new Monoid[Boolean] {
+    def op(x: Boolean, y: Boolean) = x || y
+    val zero = false
+  }
 
-  val booleanAnd: Monoid[Boolean] = sys.error("todo")
+  val booleanAnd: Monoid[Boolean] = new Monoid[Boolean] {
+    def op(x: Boolean, y: Boolean) = x && y
+    val zero = true
+  }
 
-  def optionMonoid[A]: Monoid[Option[A]] = sys.error("todo")
+  def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]] {
+    def op(x: Option[A], y: Option[A]) = x orElse y
+    val zero = None
+  }
 
   def endoMonoid[A]: Monoid[A => A] = sys.error("todo")
 
@@ -68,11 +83,11 @@ object Monoid {
   case class Stub(chars: String) extends WC
   case class Part(lStub: String, words: Int, rStub: String) extends WC
 
-  def par[A](m: Monoid[A]): Monoid[Par[A]] = 
+  def par[A](m: Monoid[A]): Monoid[Par[A]] =
     sys.error("todo")
 
-  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = 
-    sys.error("todo") 
+  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
+    sys.error("todo")
 
   val wcMonoid: Monoid[WC] = sys.error("todo")
 
@@ -156,4 +171,3 @@ object OptionFoldable extends Foldable[Option] {
   override def foldRight[A, B](as: Option[A])(z: B)(f: (A, B) => B) =
     sys.error("todo")
 }
-
